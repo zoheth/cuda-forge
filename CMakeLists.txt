@@ -12,16 +12,15 @@ set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
 find_package(CUDAToolkit REQUIRED)
 
-add_executable(vector_add
-    src/main.cpp
-    src/vector_add.cu
+add_executable(cuda_forge
+    "src/main.cu"
 )
 
-target_include_directories(vector_add PRIVATE
+target_include_directories(cuda_forge PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries(vector_add
+target_link_libraries(cuda_forge
     PRIVATE
         CUDA::cudart
         CUDA::cuda_driver
@@ -30,11 +29,11 @@ target_link_libraries(vector_add
         # CUDA::curand
 )
 
-set_target_properties(vector_add PROPERTIES
+set_target_properties(cuda_forge PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
 )
 
-target_compile_options(vector_add
+target_compile_options(cuda_forge
     PRIVATE
     $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler /bigobj>
 )
