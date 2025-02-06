@@ -1,14 +1,15 @@
 #include "vector_add.cuh"
 
-#include <stdio.h>
 #include <memory>
 #include <stdexcept>
+#include <stdio.h>
 
-template<typename T>
+template <typename T>
 class CudaMemory
 {
-public:
-	explicit CudaMemory(size_t count) : size_(count * sizeof(T))
+  public:
+	explicit CudaMemory(size_t count) :
+	    size_(count * sizeof(T))
 	{
 		const cudaError_t cuda_status = cudaMalloc(&data_, size_);
 		if (cuda_status != cudaSuccess)
@@ -19,30 +20,38 @@ public:
 
 	~CudaMemory()
 	{
-		if(data_)
+		if (data_)
 		{
 			cudaFree(data_);
 		}
 	}
 
-	CudaMemory(const CudaMemory&) = delete;
-	CudaMemory& operator=(const CudaMemory&) = delete;
+	CudaMemory(const CudaMemory &)            = delete;
+	CudaMemory &operator=(const CudaMemory &) = delete;
 
-	bool CopyFromHost(const T* hostData) {
+	bool CopyFromHost(const T *hostData)
+	{
 		return cudaMemcpy(data_, hostData, size_,
-			cudaMemcpyHostToDevice) == cudaSuccess;
+		                  cudaMemcpyHostToDevice) == cudaSuccess;
 	}
 
-	bool CopyToHost(T* hostData) const {
+	bool CopyToHost(T *hostData) const
+	{
 		return cudaMemcpy(hostData, data_, size_,
-			cudaMemcpyDeviceToHost) == cudaSuccess;
+		                  cudaMemcpyDeviceToHost) == cudaSuccess;
 	}
 
-	T* get() { return data_; }
-	const T* get() const { return data_; }
+	T *get()
+	{
+		return data_;
+	}
+	const T *get() const
+	{
+		return data_;
+	}
 
-private:
-	T* data_ = nullptr;
+  private:
+	T     *data_ = nullptr;
 	size_t size_ = 0;
 };
 
@@ -57,42 +66,47 @@ __global__ void addKernel(const float *a, const float *b, float *c, int size)
 
 cudaError_t AddVectorsGpu(const float *a, const float *b, float *c, int size)
 {
-	try {
+	try
+	{
 		CudaMemory<float> dev_a(size);
 		CudaMemory<float> dev_b(size);
 		CudaMemory<float> dev_c(size);
 
-		if (!dev_a.CopyFromHost(a) || !dev_b.CopyFromHost(b)) {
+		if (!dev_a.CopyFromHost(a) || !dev_b.CopyFromHost(b))
+		{
 			return cudaErrorMemoryAllocation;
 		}
 
 		int block_size;
 		int min_grid_size;
 		cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size,
-			addKernel, 0, 0);
+		                                   addKernel, 0, 0);
 
 		const int num_blocks = (size + block_size - 1) / block_size;
 
-		addKernel << <num_blocks, block_size >> > (
-			dev_a.get(), dev_b.get(), dev_c.get(), size
-			);
+		addKernel<<<num_blocks, block_size>>>(
+		    dev_a.get(), dev_b.get(), dev_c.get(), size);
 
 		cudaError_t kernel_status = cudaGetLastError();
-		if (kernel_status != cudaSuccess) {
+		if (kernel_status != cudaSuccess)
+		{
 			return kernel_status;
 		}
 
-		if (cudaDeviceSynchronize() != cudaSuccess) {
+		if (cudaDeviceSynchronize() != cudaSuccess)
+		{
 			return cudaErrorLaunchFailure;
 		}
 
-		if (!dev_c.CopyToHost(c)) {
+		if (!dev_c.CopyToHost(c))
+		{
 			return cudaErrorUnknown;
 		}
 
 		return cudaSuccess;
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception &e)
+	{
 		fprintf(stderr, "CUDA error: %s\n", e.what());
 		return cudaErrorUnknown;
 	}

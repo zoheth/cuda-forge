@@ -5,13 +5,14 @@
 #include <device_launch_parameters.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-cudaError_t AddVectorsGpu(const float *a, const float *b, float *c, int size);
+	cudaError_t AddVectorsGpu(const float *a, const float *b, float *c, int size);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // VECTOR_ADD_CUH
+#endif        // VECTOR_ADD_CUH

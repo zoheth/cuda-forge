@@ -1,58 +1,61 @@
-#include <cstdio>
-#include <cub/block/block_reduce.cuh>
-#include <cuda/atomic>
-#include <cuda/std/span>
-#include <device_launch_parameters.h>
-#include <thrust/device_vector.h>
-#include <thrust/execution_policy.h>
+#include "basic_matrix_mul.cuh"
+#include <iostream>
 
-template <int block_size>
-__global__ void reduce(cuda::std::span<int const> data, cuda::std::span<int> result)
+template <typename T>
+bool verify_result(const Matrix<T> &A, const Matrix<T> &B, const Matrix<T> &C)
 {
-	using BlockReduce = cub::BlockReduce<int, block_size>;
-	__shared__ typename BlockReduce::TempStorage temp_storage;
+	const T   tolerance = 1e-4;
+	const int width     = A.width();
 
-	int const index = threadIdx.x + blockIdx.x * blockDim.x;
-	int       sum   = 0;
-	if (index < data.size())
+	for (int i = 0; i < width; ++i)
 	{
-		sum += data[index];
+		for (int j = 0; j < width; ++j)
+		{
+			T sum = 0;
+			for (int k = 0; k < width; ++k)
+			{
+				sum += A.host_data()[i * width + k] * B.host_data()[k * width + j];
+			}
+			if (std::abs(C.host_data()[i * width + j] - sum) > tolerance)
+			{
+				std::cout << C.host_data()[i * width + j] << std::endl;
+				std::cout << sum << std::endl;
+				std::cout << "Verification failed at [" << i << "," << j << "]!" << std::endl;
+				return false;
+			}
+		}
 	}
-	sum = BlockReduce(temp_storage).Sum(sum);
-
-	if (threadIdx.x == 0)
-	{
-		cuda::atomic_ref<int, cuda::thread_scope_device> atomic_result(result.front());
-		atomic_result.fetch_add(sum, cuda::memory_order_relaxed);
-	}
+	return true;
 }
 
 int main()
 {
-	int const                  N = 1000;
-	thrust::device_vector<int> data(N);
-	thrust::fill(data.begin(), data.end(), 1);
+	constexpr int width  = 1000;
+	constexpr int height = 500;
 
-	thrust::device_vector<int> kernel_result(1);
+	Matrix<float> A(400, height);
+	Matrix<float> B(width, 400);
+	Matrix<float> C(width, height);
 
-	constexpr int block_size = 256;
-	int const     num_blocks = (N + block_size - 1) / block_size;
-	reduce<block_size><<<num_blocks, block_size>>>(cuda::std::span<int const>(thrust::raw_pointer_cast(data.data()), data.size()),
-	                                               cuda::std::span<int>(thrust::raw_pointer_cast(kernel_result.data()), 1));
+	A.random_init();
+	B.random_init();
 
-	auto const err = cudaDeviceSynchronize();
-	if (err != cudaSuccess)
+	BasicMatrixMultiplier<float> multiplier;
+
+	A.to_device();
+	B.to_device();
+
+	CudaTimer timer;
+	timer.start();
+
+	multiplier.multiply(A, B, C);
+
+	float ms = timer.stop();
+	std::cout << "Kernel execution time: " << ms << " ms" << std::endl;
+
+	C.to_host();
+	if (verify_result(A, B, C))
 	{
-		std::cout << "Error:" << cudaGetErrorString(err) << std::endl;
-		return -1;
+		std::cout << "Verification successful!" << std::endl;
 	}
-
-	int const custom_result = kernel_result.front();
-
-	int const thrust_result = thrust::reduce(thrust::device, data.begin(), data.end());
-
-	std::printf("Custom kernel sum: %d\n", custom_result);
-	std::printf("Thrust reduce sum: %d\n", thrust_result);
-	assert(kernel_result[0] == thrust_result);
-	return 0;
 }
