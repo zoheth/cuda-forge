@@ -2,7 +2,8 @@
 
 #include "cuda_utils.h"
 #include <memory>
-
+#include <iomanip>
+#include <iostream>
 #include <vector>
 
 template <typename T>
@@ -68,6 +69,32 @@ class Matrix
 	size_t size() const
 	{
 		return size_;
+	}
+
+	void print() const
+	{
+		const int width_per_element = 8;
+
+		std::cout << "┌";
+		for (int i = 0; i < width_ * (width_per_element + 1) + 1; ++i)
+			std::cout << "─";
+		std::cout << "┐\n";
+
+		for (int i = 0; i < height_; ++i)
+		{
+			std::cout << "│ ";
+			for (int j = 0; j < width_; ++j)
+			{
+				std::cout << std::fixed << std::setprecision(2)
+						  << std::setw(width_per_element) << h_data_[i * width_ + j] << " ";
+			}
+			std::cout << "│\n";
+		}
+
+		std::cout << "└";
+		for (int i = 0; i < width_ * (width_per_element + 1) + 1; ++i)
+			std::cout << "─";
+		std::cout << "┘\n";
 	}
 
   private:

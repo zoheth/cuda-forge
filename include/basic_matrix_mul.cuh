@@ -13,19 +13,19 @@ class BasicMatrixMultiplier : public MatrixMultiplier<T>
 };
 
 template <typename T>
-__global__ void matrixMulKernel(T *A, T *B, T *C, int width)
+__global__ void matrixMulKernel(T *M, T *N, T *P, int M_height, int M_width, int N_width)
 {
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
 	int col = blockIdx.x * blockDim.x + threadIdx.x;
 
-	if (row < width && col < width)
+	if (row < M_height && col < N_width)
 	{
 		T sum = 0;
-		for (int i = 0; i < width; ++i)
+		for (int i = 0; i < M_width; ++i)
 		{
-			sum += A[row * width + i] * B[i * width + col];
+			sum += M[row * M_width + i] * N[i * N_width + col];
 		}
-		C[row * width + col] = sum;
+		P[row * N_width + col] = sum;
 	}
 }
 
@@ -38,7 +38,7 @@ void BasicMatrixMultiplier<T>::multiply(const Matrix<T> &A, const Matrix<T> &B, 
 	    (A.height() + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
 	matrixMulKernel<<<blocksPerGrid, threadsPerBlock>>>(
-	    A.device_data(), B.device_data(), C.device_data(), A.width());
+	    A.device_data(), B.device_data(), C.device_data(), A.height(), A.width(), B.width());
 
 	CHECK_CUDA_ERROR(cudaGetLastError());
 	CHECK_CUDA_ERROR(cudaDeviceSynchronize());
