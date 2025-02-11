@@ -61,7 +61,7 @@ int main()
 	A.random_init();
 	B.random_init();
 
-	TiledMatrixMultiplier<float> multiplier;
+	TiledMatrixMultiplier<float> multiplier(true);
 	//BasicMatrixMultiplier<float> multiplier;
 
 	A.to_device();
