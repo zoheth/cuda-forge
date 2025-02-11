@@ -1,21 +1,9 @@
-#pragma once
+#include "tiled_matrix_mul.cuh"
 
-#include "matrix_ops.h"
-
-#define TILE_WIDTH 16
+template class TiledMatrixMultiplier<float>;
 
 template <typename T>
-class TiledMatrixMultiplier : public MatrixMultiplier<T>
-{
-  public:
-	void multiply(const Matrix<T> &A, const Matrix<T> &B, Matrix<T> &C) override;
-
-  private:
-	static constexpr int BLOCK_SIZE = 16;
-};
-
-template <typename T>
-__global__ void tiledMatrixMulKernel(T *M, T *N, T *P, int M_height, int M_width /* = N_height*/, int N_width)
+__global__ void matrixMulKernel(T *M, T *N, T *P, int M_height, int M_width /* = N_height*/, int N_width)
 {
 	__shared__ T Mds[TILE_WIDTH][TILE_WIDTH];
 	__shared__ T Nds[TILE_WIDTH][TILE_WIDTH];
@@ -73,11 +61,11 @@ void TiledMatrixMultiplier<T>::multiply(const Matrix<T> &A, const Matrix<T> &B, 
 {
 	dim3 threadsPerBlock(TILE_WIDTH, TILE_WIDTH);
 	dim3 blocksPerGrid(
-	    (B.width() + TILE_WIDTH - 1) / TILE_WIDTH,
-	    (A.height() + TILE_WIDTH - 1) / TILE_WIDTH);
+		(B.width() + TILE_WIDTH - 1) / TILE_WIDTH,
+		(A.height() + TILE_WIDTH - 1) / TILE_WIDTH);
 
-	tiledMatrixMulKernel<<<blocksPerGrid, threadsPerBlock>>>(
-	    A.device_data(), B.device_data(), C.device_data(), A.height(), A.width(), B.width());
+	matrixMulKernel<<<blocksPerGrid, threadsPerBlock>>>(
+		A.device_data(), B.device_data(), C.device_data(), A.height(), A.width(), B.width());
 
 	CHECK_CUDA_ERROR(cudaGetLastError());
 	CHECK_CUDA_ERROR(cudaDeviceSynchronize());

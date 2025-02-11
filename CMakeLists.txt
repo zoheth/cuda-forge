@@ -17,7 +17,7 @@ include_directories(
         ${PROJECT_SOURCE_DIR}/src
 )
 
-file(GLOB_RECURSE SOURCES "src/*.cu" "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cu" "src/*.cuh" "src/*.cpp")
 file(GLOB_RECURSE HEADERS "include/*.h" "include/*.cuh")
 
 add_executable(cuda_forge

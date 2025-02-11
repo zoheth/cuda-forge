@@ -1,6 +1,6 @@
 #pragma once
 
-#include "matrix_ops.h"
+#include "../include/matrix_ops.h"
 
 template <typename T>
 class BasicMatrixMultiplier : public MatrixMultiplier<T>
