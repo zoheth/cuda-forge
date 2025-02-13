@@ -1,5 +1,6 @@
 #pragma once
-#include "core/common.h"
+
+#include "cuda_runtime.h"
 
 namespace cuda_kernels::elementwise
 {
