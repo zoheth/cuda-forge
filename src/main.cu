@@ -50,8 +50,8 @@ int main()
 	constexpr int width  = 10000;
 	constexpr int height = 8000;
 
-	Matrix<float> A(4000, height);
-	Matrix<float> B(width, 4000);
+	Matrix<float> A(6000, height);
+	Matrix<float> B(width, 6000);
 	Matrix<float> C(width, height);
 
 	// Matrix<float> A(width, width);
@@ -61,7 +61,8 @@ int main()
 	A.random_init();
 	B.random_init();
 
-	TiledMatrixMultiplier<float> multiplier(true);
+	TiledMatrixMultiplier<float> multiplier(false);
+	//multiplier.useThreadCoarsening(true);
 	//BasicMatrixMultiplier<float> multiplier;
 
 	A.to_device();
