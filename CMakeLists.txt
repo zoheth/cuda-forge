@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 
-set(CMAKE_CUDA_ARCHITECTURES 75)
+set(CMAKE_CUDA_ARCHITECTURES 86)
 project(cuda_practice
-    CUDA CXX
+        CUDA CXX
 )
 
 set(CMAKE_CXX_STANDARD 20)
@@ -17,20 +17,26 @@ include_directories(
         ${PROJECT_SOURCE_DIR}/src
 )
 
-file(GLOB_RECURSE SOURCES "src/*.cu" "src/*.cuh" "src/*.cpp")
-file(GLOB_RECURSE HEADERS "include/*.h" "include/*.cuh")
+file(GLOB_RECURSE SOURCES
+        "csrc/kernels/*.cu"
+        "csrc/kernels/*.cuh"
+        "csrc/kernels/*.cpp"
+        "csrc/core/*.cu"
+        "csrc/core/*.cuh"
+        "csrc/core/*.cpp"
+        "csrc/main.cu"
+)
 
 add_executable(cuda_forge
         ${SOURCES}
-        ${HEADERS}
 )
 
 target_include_directories(cuda_forge PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/csrc
 )
 
 target_link_libraries(cuda_forge
-    PRIVATE
+        PRIVATE
         CUDA::cudart
         CUDA::cuda_driver
         # CUDA::cublas
@@ -39,7 +45,7 @@ target_link_libraries(cuda_forge
 )
 
 set_target_properties(cuda_forge PROPERTIES
-    CUDA_SEPARABLE_COMPILATION ON
+        CUDA_SEPARABLE_COMPILATION ON
 )
 
 #target_compile_options(cuda_forge
