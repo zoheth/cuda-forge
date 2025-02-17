@@ -18,13 +18,13 @@ include_directories(
 )
 
 file(GLOB_RECURSE SOURCES
-        "csrc/kernels/*.cu"
-        "csrc/kernels/*.cuh"
-        "csrc/kernels/*.cpp"
-        "csrc/core/*.cu"
-        "csrc/core/*.cuh"
-        "csrc/core/*.cpp"
-        "csrc/main.cu"
+        "src/kernels/*.cu"
+        "src/kernels/*.cuh"
+        "src/kernels/*.cpp"
+        "src/core/*.cu"
+        "src/core/*.cuh"
+        "src/core/*.cpp"
+        "src/main.cu"
 )
 
 add_executable(cuda_forge
@@ -32,7 +32,7 @@ add_executable(cuda_forge
 )
 
 target_include_directories(cuda_forge PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/csrc
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(cuda_forge

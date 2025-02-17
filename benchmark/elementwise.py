@@ -12,11 +12,10 @@ parent_dir = os.path.dirname(project_root)
 
 # Load the CUDA kernel as a python module
 lib = load(name='elementwise_lib',
-           sources=["csrc/kernels/elementwise/adds.cu",
-                    "csrc/torch/binding.cu"],
+           sources=["src/kernels/elementwise/adds.cu",
+                    "src/torch/binding.cu"],
            extra_include_paths=[
-               os.path.join(parent_dir, "csrc"),  # 添加csrc目录到包含路径
-               os.path.join(parent_dir, "csrc/kernels")
+               os.path.join(parent_dir, "src")
            ],
            extra_cuda_cflags=[
                "-O3",
