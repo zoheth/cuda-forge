@@ -1,16 +1,14 @@
 #include "adds.cuh"
 
-#include "core/common.h"
-
 #include <cuda_bf16.h>
 #include <cuda_fp8.h>
 
 namespace cuda_kernels::elementwise
 {
-__global__ void add_f32_kernel(float *a, float *b, float *c, int N)
+__global__ void add_f32_kernel(cuda::std::span<float> a, cuda::std::span<float> b, cuda::std::span<float> c)
 {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	if (idx < N)
+	if (idx < c.size())
 		c[idx] = a[idx] + b[idx];
 }
 __global__ void add_f32x4_kernel(float *a, float *b, float *c, int N)

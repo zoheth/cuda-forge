@@ -1,13 +1,15 @@
 #pragma once
 
-#include <cuda_runtime.h>
+#include "core/common.h"
+
 #include <cuda_fp16.h>
+#include <cuda_runtime.h>
 
 namespace cuda_kernels::elementwise
 {
 
 // FP32 kernels
-__global__ void add_f32_kernel(float *a, float *b, float *c, int N);
+__global__ void add_f32_kernel(cuda::std::span<float> a, cuda::std::span<float> b, cuda::std::span<float> c);
 __global__ void add_f32x4_kernel(float *a, float *b, float *c, int N);
 
 // FP16 kernels
