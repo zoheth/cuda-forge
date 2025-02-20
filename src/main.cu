@@ -1,5 +1,6 @@
 #include "kernels/elementwise/test.h"
 #include "kernels/histogram/test.h"
+#include "kernels/reduction/test.h"
 
 int main()
 {
@@ -8,8 +9,11 @@ int main()
 	// elementwise_benchmark.benchmark_f32();
 	// elementwise_benchmark.benchmark_f16();
 
-	HistogramBenchmark histogram_benchmark(1000000);
-	histogram_benchmark.benchmark();
+	// HistogramBenchmark histogram_benchmark(1000000);
+	// histogram_benchmark.benchmark();
+
+	ReductionBenchmark reduction_benchmark(4096*4096);
+	reduction_benchmark.benchmark();
 
 	CudaTimer::print_all();
 
