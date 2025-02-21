@@ -7,6 +7,8 @@
 #include <random>
 #include <string>
 
+inline uint32_t CFACTOR = 4;
+
 inline std::string gen_random_string(size_t length)
 {
 	thread_local std::mt19937 gen(std::random_device{}());

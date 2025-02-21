@@ -3,7 +3,6 @@
 #include "core/common.h"
 
 #define NUM_BINS 7
-#define CFACTOR 4
 
 namespace cuda_kernels::histogram
 {
